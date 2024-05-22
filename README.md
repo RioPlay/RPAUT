@@ -6,13 +6,13 @@ This repository contains a collection of PowerShell scripts and modules designed
 
 ## Getting Started
 
-To use these scripts, clone the repository and run the desired script from the appropriate directory.
+To use these scripts, follow these steps:
 
-```sh
-git clone https://github.com/yourusername/RPAUT.git
-cd RPAUT/scripts/automation/networking
-./your-script.ps1
-```
+1. **Clone the Repository:**
+   ```sh
+   git clone https://github.com/RioPlay/RPAUT.git
+   cd RPAUT
+   ```
 
 ## Script Categories
 
