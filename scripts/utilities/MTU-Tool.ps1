@@ -106,7 +106,7 @@ function Test-MTU {
 }
 
 # Set the MTU for a network adapter
-function Set-MTU {
+function Set-AdapterMTU {
     param (
         [string]$AdapterName,
         [int]$MTU,
@@ -153,7 +153,7 @@ function Test-IPv4IPv6Support {
 
     try {
         $ipv4Interfaces = $adapter | Get-NetIPInterface -AddressFamily IPv4 -ErrorAction Stop
-        if ($ipv4Interfaces.Count -gt 0) {
+        if ($ipv4Interfaces) {
             $ipv4Enabled = $true
         }
     } catch {
@@ -162,7 +162,7 @@ function Test-IPv4IPv6Support {
 
     try {
         $ipv6Interfaces = $adapter | Get-NetIPInterface -AddressFamily IPv6 -ErrorAction Stop
-        if ($ipv6Interfaces.Count -gt 0) {
+        if ($ipv6Interfaces) {
             $ipv6Enabled = $true
         }
     } catch {
@@ -185,12 +185,12 @@ function Get-MainMenu {
     Write-Host "  5. Exit"
 }
 
-function Set-MTU-Setting {
+function Set-AdapterMTUSetting {
     param (
         [string]$SettingType
     )
 
-    $settingFunction = if ($SettingType -eq "persistent") { "Set-PersistentMTU" } else { "Set-ActiveMTU" }
+    $persistent = $SettingType -eq "persistent"
     Write-Host "Setting $SettingType MTU..."
 
     # Get all network adapters
@@ -225,10 +225,10 @@ function Set-MTU-Setting {
         return
     }
 
-    & $settingFunction -AdapterName $selectedAdapter.Name -MTU $standardMTU
+    Set-AdapterMTU -AdapterName $selectedAdapter.Name -MTU $standardMTU -Persistent $persistent
 }
 
-function Test-MTU-Process {
+function Test-AdapterMTUProcess {
     # Get all network adapters
     $adapters = Get-NetworkAdapters
 
@@ -393,11 +393,11 @@ function Test-MTU-Process {
     # Select appropriate test servers based on randomization selection
     switch ($randomize) {
         "IPv4" {
-            $testServerIPs = $testServers | Where-Object { $_.IP -notmatch ":" } | Select-Object -ExpandProperty IP
+            $testServerIPs = $testServers | Where-Object { $_.IP -notmatch ":" } | ForEach-Object { $_.IP }
             if ($testServerIPs.Count -eq 0) {
                 Write-Host "No IPv4 servers available. Falling back to IPv6."
                 $randomize = "IPv6"
-                $testServerIPs = $testServers | Where-Object { $_.IP -match ":" } | Select-Object -ExpandProperty IP
+                $testServerIPs = $testServers | Where-Object { $_.IP -match ":" } | ForEach-Object { $_.IP }
                 if ($testServerIPs.Count -eq 0) {
                     Write-Host "No IPv6 servers available either. Cannot proceed with testing."
                     return
@@ -405,11 +405,11 @@ function Test-MTU-Process {
             }
         }
         "IPv6" {
-            $testServerIPs = $testServers | Where-Object { $_.IP -match ":" } | Select-Object -ExpandProperty IP
+            $testServerIPs = $testServers | Where-Object { $_.IP -match ":" } | ForEach-Object { $_.IP }
             if ($testServerIPs.Count -eq 0) {
                 Write-Host "No IPv6 servers available. Falling back to IPv4."
                 $randomize = "IPv4"
-                $testServerIPs = $testServers | Where-Object { $_.IP -notmatch ":" } | Select-Object -ExpandProperty IP
+                $testServerIPs = $testServers | Where-Object { $_.IP -notmatch ":" } | ForEach-Object { $_.IP }
                 if ($testServerIPs.Count -eq 0) {
                     Write-Host "No IPv4 servers available either. Cannot proceed with testing."
                     return
@@ -417,7 +417,7 @@ function Test-MTU-Process {
             }
         }
         "Both" {
-            $testServerIPs = $testServers | Select-Object -ExpandProperty IP
+            $testServerIPs = $testServers | ForEach-Object { $_.IP }
         }
         default {
             $testServerIPs = @($testServerIP)
@@ -458,7 +458,7 @@ function Test-MTU-Process {
         # Ask the user if they want to set it persistently
         $persistent = Read-Host "Do you want to set it persistently? (y/n)"
         $persistent = $persistent -eq 'y'
-        Set-MTU -AdapterName $selectedAdapter.Name -MTU $maxMTU -Persistent $persistent
+        Set-AdapterMTU -AdapterName $selectedAdapter.Name -MTU $maxMTU -Persistent $persistent
     }
 }
 
@@ -523,13 +523,13 @@ function Main {
                 Get-MTU
             }
             2 {
-                Test-MTU-Process
+                Test-AdapterMTUProcess
             }
             3 {
-                Set-MTU-Setting -SettingType "persistent"
+                Set-AdapterMTUSetting -SettingType "persistent"
             }
             4 {
-                Set-MTU-Setting -SettingType "active"
+                Set-AdapterMTUSetting -SettingType "active"
             }
             5 {
                 Write-Host "Exiting..."
