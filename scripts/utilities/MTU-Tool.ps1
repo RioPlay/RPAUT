@@ -176,6 +176,7 @@ function Test-IPv4IPv6Support {
 }
 
 function Get-MainMenu {
+    Write-Host "    MTU Tool Main Menu"
     Write-Host "Options:"
     Write-Host "  1. Check MTU settings"
     Write-Host "  2. Test and set MTU"
