@@ -203,8 +203,8 @@ function Show-RobocopyGui {
     })
 
     $window.FindName("RunButton").Add_Click({
-        $source = $window.FindName("SourceTextBox").Text
-        $destination = $window.FindName("DestinationTextBox").Text
+        $source = $window.FindName("SourceTextBox").Text.Trim('"')
+        $destination = $window.FindName("DestinationTextBox").Text.Trim('"')
         $options = ""
 
         # Ensure the correct order of options
@@ -249,13 +249,13 @@ function Show-RobocopyGui {
         }
         if ($window.FindName("LCheckbox").IsChecked -eq $true) { $options += "/L " }
         if ($window.FindName("XFCheckbox").IsChecked -eq $true) {
-            $xfValue = $window.FindName("XFValueTextBox").Text
+            $xfValue = $window.FindName("XFValueTextBox").Text.Trim('"')
             if ($xfValue) {
                 $options += "/XF `"$xfValue`" "
             }
         }
         if ($window.FindName("XDCheckbox").IsChecked -eq $true) {
-            $xdValue = $window.FindName("XDValueTextBox").Text
+            $xdValue = $window.FindName("XDValueTextBox").Text.Trim('"')
             if ($xdValue) {
                 $options += "/XD `"$xdValue`" "
             }
