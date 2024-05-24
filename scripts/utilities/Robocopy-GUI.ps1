@@ -36,6 +36,7 @@ function Show-RobocopyGui {
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
         <Grid.ColumnDefinitions>
@@ -66,7 +67,7 @@ function Show-RobocopyGui {
                     <CheckBox Name="LogPlusCheckbox" Content="/LOG+ - Output status to LOG file (append to existing log)" Margin="5"/>
                     <StackPanel Orientation="Horizontal" Margin="5">
                         <CheckBox Name="MultiThreadCheckbox" Content="/MT - Multithreaded mode (default is 8 threads)" Margin="5"/>
-                        <TextBlock VerticalAlignment="Center" Margin="5">/MT value:</TextBlock>
+                        <TextBlock VerticalAlignment="Center" Margin="5">/MT value (1-128):</TextBlock>
                         <TextBox Name="MTValueTextBox" Width="50" Margin="5"/>
                     </StackPanel>
                     <CheckBox Name="CopyAllCheckbox" Content="/COPYALL - Copy all file info" Margin="5"/>
@@ -83,8 +84,14 @@ function Show-RobocopyGui {
                         <TextBox Name="WValueTextBox" Width="50" Margin="5"/>
                     </StackPanel>
                     <CheckBox Name="LCheckbox" Content="/L - List only - don't copy, timestamp or delete any files" Margin="5"/>
-                    <CheckBox Name="XFCheckbox" Content="/XF - Exclude files" Margin="5"/>
-                    <CheckBox Name="XDCheckbox" Content="/XD - Exclude directories" Margin="5"/>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <CheckBox Name="XFCheckbox" Content="/XF - Exclude files" Margin="5"/>
+                        <TextBox Name="XFValueTextBox" Width="150" Margin="5"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <CheckBox Name="XDCheckbox" Content="/XD - Exclude directories" Margin="5"/>
+                        <TextBox Name="XDValueTextBox" Width="150" Margin="5"/>
+                    </StackPanel>
                     <!-- Add more checkboxes for other switches as needed -->
                 </StackPanel>
             </ScrollViewer>
@@ -111,6 +118,15 @@ function Show-RobocopyGui {
         }
         if ($window.FindName("IncludeSubdirectoriesCheckbox").IsChecked -eq $true -and $window.FindName("IncludeEmptySubdirectoriesCheckbox").IsChecked -eq $true) {
             $incompatibleSwitches += "/S and /E"
+        }
+        if ($window.FindName("MirrorCheckbox").IsChecked -eq $true -and $window.FindName("PurgeCheckbox").IsChecked -eq $true) {
+            $incompatibleSwitches += "/MIR and /PURGE"
+        }
+        if ($window.FindName("CopyAllCheckbox").IsChecked -eq $true -and $window.FindName("CopyDATSCheckbox").IsChecked -eq $true) {
+            $incompatibleSwitches += "/COPYALL and /COPY:DATS"
+        }
+        if ($window.FindName("NPCheckbox").IsChecked -eq $true -and $window.FindName("ETACheckbox").IsChecked -eq $true) {
+            $incompatibleSwitches += "/NP and /ETA"
         }
         if ($incompatibleSwitches.Count -gt 0) {
             $errorMessage = "The following switches are incompatible: " + ($incompatibleSwitches -join ", ")
@@ -139,6 +155,36 @@ function Show-RobocopyGui {
     $window.FindName("IncludeEmptySubdirectoriesCheckbox").Add_Unchecked({
         CheckForIncompatibleOptions
     })
+    $window.FindName("PurgeCheckbox").Add_Checked({
+        CheckForIncompatibleOptions
+    })
+    $window.FindName("PurgeCheckbox").Add_Unchecked({
+        CheckForIncompatibleOptions
+    })
+    $window.FindName("CopyAllCheckbox").Add_Checked({
+        CheckForIncompatibleOptions
+    })
+    $window.FindName("CopyAllCheckbox").Add_Unchecked({
+        CheckForIncompatibleOptions
+    })
+    $window.FindName("CopyDATSCheckbox").Add_Checked({
+        CheckForIncompatibleOptions
+    })
+    $window.FindName("CopyDATSCheckbox").Add_Unchecked({
+        CheckForIncompatibleOptions
+    })
+    $window.FindName("ETACheckbox").Add_Checked({
+        CheckForIncompatibleOptions
+    })
+    $window.FindName("ETACheckbox").Add_Unchecked({
+        CheckForIncompatibleOptions
+    })
+    $window.FindName("NPCheckbox").Add_Checked({
+        CheckForIncompatibleOptions
+    })
+    $window.FindName("NPCheckbox").Add_Unchecked({
+        CheckForIncompatibleOptions
+    })
 
     $window.FindName("BrowseSourceButton").Add_Click({
         Add-Type -AssemblyName System.Windows.Forms
@@ -161,21 +207,23 @@ function Show-RobocopyGui {
         $destination = $window.FindName("DestinationTextBox").Text
         $options = ""
 
+        # Ensure the correct order of options
         if ($window.FindName("MirrorCheckbox").IsChecked -eq $true) { $options += "/MIR " }
+        if ($window.FindName("IncludeSubdirectoriesCheckbox").IsChecked -eq $true) { $options += "/S " }
+        if ($window.FindName("IncludeEmptySubdirectoriesCheckbox").IsChecked -eq $true) { $options += "/E " }
         if ($window.FindName("PurgeCheckbox").IsChecked -eq $true) { $options += "/PURGE " }
         if ($window.FindName("RestartableCheckbox").IsChecked -eq $true) { $options += "/Z " }
         if ($window.FindName("BackupModeCheckbox").IsChecked -eq $true) { $options += "/B " }
-        if ($window.FindName("IncludeSubdirectoriesCheckbox").IsChecked -eq $true) { $options += "/S " }
-        if ($window.FindName("IncludeEmptySubdirectoriesCheckbox").IsChecked -eq $true) { $options += "/E " }
         if ($window.FindName("ETACheckbox").IsChecked -eq $true) { $options += "/ETA " }
         if ($window.FindName("TECheckbox").IsChecked -eq $true) { $options += "/TEE " }
         if ($window.FindName("LogPlusCheckbox").IsChecked -eq $true) { $options += "/LOG+ " }
         if ($window.FindName("MultiThreadCheckbox").IsChecked -eq $true) {
             $mtValue = $window.FindName("MTValueTextBox").Text
-            if ($mtValue -match '^\d+$') {
+            if ($mtValue -match '^\d+$' -and $mtValue -ge 1 -and $mtValue -le 128) {
                 $options += "/MT:$mtValue "
             } else {
-                $options += "/MT "
+                $window.FindName("ErrorMessage").Text = "Invalid /MT value. Accepted values are between 1 and 128."
+                return
             }
         }
         if ($window.FindName("CopyAllCheckbox").IsChecked -eq $true) { $options += "/COPYALL " }
@@ -200,8 +248,18 @@ function Show-RobocopyGui {
             }
         }
         if ($window.FindName("LCheckbox").IsChecked -eq $true) { $options += "/L " }
-        if ($window.FindName("XFCheckbox").IsChecked -eq $true) { $options += "/XF " }
-        if ($window.FindName("XDCheckbox").IsChecked -eq $true) { $options += "/XD " }
+        if ($window.FindName("XFCheckbox").IsChecked -eq $true) {
+            $xfValue = $window.FindName("XFValueTextBox").Text
+            if ($xfValue) {
+                $options += "/XF `"$xfValue`" "
+            }
+        }
+        if ($window.FindName("XDCheckbox").IsChecked -eq $true) {
+            $xdValue = $window.FindName("XDValueTextBox").Text
+            if ($xdValue) {
+                $options += "/XD `"$xdValue`" "
+            }
+        }
 
         # Error checking for incompatible switches
         $incompatibleSwitches = @()
@@ -213,6 +271,15 @@ function Show-RobocopyGui {
         }
         if ($window.FindName("IncludeSubdirectoriesCheckbox").IsChecked -eq $true -and $window.FindName("IncludeEmptySubdirectoriesCheckbox").IsChecked -eq $true) {
             $incompatibleSwitches += "/S and /E"
+        }
+        if ($window.FindName("MirrorCheckbox").IsChecked -eq $true -and $window.FindName("PurgeCheckbox").IsChecked -eq $true) {
+            $incompatibleSwitches += "/MIR and /PURGE"
+        }
+        if ($window.FindName("CopyAllCheckbox").IsChecked -eq $true -and $window.FindName("CopyDATSCheckbox").IsChecked -eq $true) {
+            $incompatibleSwitches += "/COPYALL and /COPY:DATS"
+        }
+        if ($window.FindName("NPCheckbox").IsChecked -eq $true -and $window.FindName("ETACheckbox").IsChecked -eq $true) {
+            $incompatibleSwitches += "/NP and /ETA"
         }
         if ($incompatibleSwitches.Count -gt 0) {
             $errorMessage = "The following switches are incompatible: " + ($incompatibleSwitches -join ", ")
