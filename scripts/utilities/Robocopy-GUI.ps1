@@ -14,34 +14,50 @@ function Show-RobocopyGui {
         Title="Robocopy GUI" Height="700" Width="800" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+        <StackPanel Grid.Row="0" Margin="10">
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center">Source:</TextBlock>
+                <TextBox Name="SourceTextBox" Grid.Row="0" Grid.Column="1" Margin="5"/>
+                <Button Name="BrowseSourceButton" Grid.Row="0" Grid.Column="2" Margin="5" Content="Browse"/>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="5" VerticalAlignment="Center">Destination:</TextBlock>
+                <TextBox Name="DestinationTextBox" Grid.Row="1" Grid.Column="1" Margin="5"/>
+                <Button Name="BrowseDestinationButton" Grid.Row="1" Grid.Column="2" Margin="5" Content="Browse"/>
+            </Grid>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
             <StackPanel Margin="10">
-                <Grid Margin="5">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center">Source:</TextBlock>
-                    <TextBox Name="SourceTextBox" Grid.Row="0" Grid.Column="1" Margin="5"/>
-                    <Button Name="BrowseSourceButton" Grid.Row="0" Grid.Column="2" Margin="5" Content="Browse"/>
-
-                    <TextBlock Grid.Row="1" Grid.Column="0" Margin="5" VerticalAlignment="Center">Destination:</TextBlock>
-                    <TextBox Name="DestinationTextBox" Grid.Row="1" Grid.Column="1" Margin="5"/>
-                    <Button Name="BrowseDestinationButton" Grid.Row="1" Grid.Column="2" Margin="5" Content="Browse"/>
-                </Grid>
+                <GroupBox Header="Common Options" Margin="5">
+                    <StackPanel Name="CommonOptionsPanel" Margin="5">
+                        <CheckBox Name="MirrorCheckbox" Content="/MIR - Mirror a directory tree (equivalent to /E plus /PURGE)" Margin="5"/>
+                        <CheckBox Name="IncludeSubdirectoriesCheckbox" Content="/S - Copy subdirectories" Margin="5"/>
+                        <CheckBox Name="IncludeEmptySubdirectoriesCheckbox" Content="/E - Copy subdirectories, including empty ones" Margin="5"/>
+                        <CheckBox Name="PurgeCheckbox" Content="/PURGE - Delete dest files/dirs that no longer exist in source" Margin="5"/>
+                        <CheckBox Name="RestartableCheckbox" Content="/Z - Restartable mode" Margin="5"/>
+                        <CheckBox Name="BackupModeCheckbox" Content="/B - Backup mode" Margin="5"/>
+                        <CheckBox Name="SecCheckbox" Content="/SEC - Copy files with SECurity (equivalent to /COPY:DATS)" Margin="5"/>
+                    </StackPanel>
+                </GroupBox>
 
                 <GroupBox Header="File Selection Options" Margin="5">
-                    <StackPanel Margin="5">
+                    <StackPanel Name="FileSelectionOptionsPanel" Margin="5">
                         <CheckBox Name="AOnlyCheckbox" Content="/A - Copy only files with the Archive attribute set" Margin="5"/>
                         <CheckBox Name="MCheckbox" Content="/M - Copy only files with the Archive attribute and reset it" Margin="5"/>
                         <StackPanel Orientation="Horizontal" Margin="5">
@@ -56,7 +72,7 @@ function Show-RobocopyGui {
                 </GroupBox>
 
                 <GroupBox Header="Retry Options" Margin="5">
-                    <StackPanel Margin="5">
+                    <StackPanel Name="RetryOptionsPanel" Margin="5">
                         <StackPanel Orientation="Horizontal" Margin="5">
                             <CheckBox Name="RCheckbox" Content="/R - Number of retries on failed copies" Margin="5"/>
                             <TextBox Name="RValueTextBox" Width="50" Margin="5"/>
@@ -76,11 +92,12 @@ function Show-RobocopyGui {
                         <CheckBox Name="NPCheckbox" Content="/NP - No progress - don’t display percentage copied" Margin="5"/>
                         <CheckBox Name="LogCheckbox" Content="/LOG - Output status to LOG file (overwrite existing log)" Margin="5"/>
                         <CheckBox Name="LogPlusCheckbox" Content="/LOG+ - Output status to LOG file (append to existing log)" Margin="5"/>
+                        <CheckBox Name="ETACheckbox" Content="/ETA - Show estimated time of arrival for copied files" Margin="5"/>
                     </StackPanel>
                 </GroupBox>
 
                 <GroupBox Header="Job Options" Margin="5">
-                    <StackPanel Margin="5">
+                    <StackPanel Name="JobOptionsPanel" Margin="5">
                         <StackPanel Orientation="Horizontal" Margin="5">
                             <CheckBox Name="JobCheckbox" Content="/JOB - Take parameters from the named job file" Margin="5"/>
                             <TextBox Name="JobValueTextBox" Width="150" Margin="5"/>
@@ -97,13 +114,8 @@ function Show-RobocopyGui {
 
                 <GroupBox Header="Advanced Options" Margin="5">
                     <StackPanel Name="AdvancedOptionsPanel" Margin="5">
-                        <CheckBox Name="MirrorCheckbox" Content="/MIR - Mirror a directory tree (equivalent to /E plus /PURGE)" Margin="5"/>
-                        <CheckBox Name="SecCheckbox" Content="/SEC - Copy files with SECurity (equivalent to /COPY:DATS)" Margin="5"/>
                         <CheckBox Name="CopyDATSCheckbox" Content="/COPY:DATS - Copy Data, Attributes, Timestamps, Security" Margin="5"/>
                         <CheckBox Name="DCopyCheckbox" Content="/DCOPY:T - Copy Directory Timestamps" Margin="5"/>
-                        <CheckBox Name="PurgeCheckbox" Content="/PURGE - Delete dest files/dirs that no longer exist in source" Margin="5"/>
-                        <CheckBox Name="MOVCheckbox" Content="/MOV - MOVe files (delete from source after copying)" Margin="5"/>
-                        <CheckBox Name="MoveCheckbox" Content="/MOVE - Move files and directories (delete from source after copying)" Margin="5"/>
                         <CheckBox Name="CreateCheckbox" Content="/CREATE - CREATE directory tree and zero-length files only" Margin="5"/>
                         <CheckBox Name="FatCheckbox" Content="/FAT - Use 8.3 FAT file names only" Margin="5"/>
                         <CheckBox Name="LongPathCheckbox" Content="/256 - Turn off very long path (> 256 characters) support" Margin="5"/>
@@ -135,7 +147,7 @@ function Show-RobocopyGui {
                 </GroupBox>
 
                 <GroupBox Header="Multithreading Options" Margin="5">
-                    <StackPanel Margin="5">
+                    <StackPanel Name="MultithreadingOptionsPanel" Margin="5">
                         <StackPanel Orientation="Horizontal" Margin="5">
                             <CheckBox Name="MultiThreadCheckbox" Content="/MT - Multithreaded mode (default is 8 threads)" Margin="5"/>
                             <TextBlock VerticalAlignment="Center" Margin="5">/MT value (1-128):</TextBlock>
@@ -145,7 +157,7 @@ function Show-RobocopyGui {
                 </GroupBox>
 
                 <GroupBox Header="Network Options" Margin="5">
-                    <StackPanel Margin="5">
+                    <StackPanel Name="NetworkOptionsPanel" Margin="5">
                         <StackPanel Orientation="Horizontal" Margin="5">
                             <CheckBox Name="IPGCheckbox" Content="/IPG - Inter-Packet Gap (ms)" Margin="5"/>
                             <TextBox Name="IPGValueTextBox" Width="50" Margin="5"/>
@@ -155,18 +167,18 @@ function Show-RobocopyGui {
 
                 <GroupBox Header="Copy Options" Margin="5">
                     <StackPanel Name="CopyOptionsPanel" Margin="5">
-                        <CheckBox Name="RestartableCheckbox" Content="/Z - Restartable mode" Margin="5"/>
-                        <CheckBox Name="BackupModeCheckbox" Content="/B - Backup mode" Margin="5"/>
                         <CheckBox Name="ZBCheckbox" Content="/ZB - Use restartable mode; if access denied use Backup mode" Margin="5"/>
                         <CheckBox Name="JCheckbox" Content="/J - Copy using unbuffered I/O (recommended for large files)" Margin="5"/>
                     </StackPanel>
                 </GroupBox>
 
-                <TextBlock Name="ErrorMessage" Margin="5" Foreground="Red" TextWrapping="Wrap"/>
             </StackPanel>
         </ScrollViewer>
 
-        <Button Name="RunButton" Grid.Row="1" Content="Run Robocopy" Height="40" Margin="10"/>
+        <StackPanel Grid.Row="2" Margin="10">
+            <TextBlock Name="ErrorMessage" Foreground="Red" TextWrapping="Wrap" Margin="5"/>
+            <Button Name="RunButton" Content="Run Robocopy" Height="40" Margin="5"/>
+        </StackPanel>
     </Grid>
 </Window>
 "@
@@ -176,12 +188,16 @@ function Show-RobocopyGui {
 
     # Function to show error message for 5 seconds
     function ShowErrorMessage($message) {
-        $window.FindName("ErrorMessage").Text = $message
+        $window.Dispatcher.Invoke([action] {
+            $window.FindName("ErrorMessage").Text = $message
+        })
         $timer = New-Object Timers.Timer
         $timer.Interval = 5000
         $timer.AutoReset = $false
         $timer.add_Elapsed({
-            $window.Dispatcher.Invoke([action]{ $window.FindName("ErrorMessage").Text = "" })
+            $window.Dispatcher.Invoke([action] {
+                $window.FindName("ErrorMessage").Text = ""
+            })
         })
         $timer.Start()
     }
@@ -190,7 +206,6 @@ function Show-RobocopyGui {
     function HandleCheckboxChange {
         param ($checkbox)
         $incompatibleSwitches = @()
-        $conflict = $false
         $conflictMessage = ""
 
         switch ($checkbox.Name) {
@@ -225,14 +240,14 @@ function Show-RobocopyGui {
                     if ($window.FindName("CopyDATSCheckbox").IsChecked -eq $true) { $conflictMessage = "/SEC conflicts with /COPY:DATS"; $window.FindName("CopyDATSCheckbox").IsChecked = $false }
                 }
             }
-            "ETACheckbox" {
-                if ($checkbox.IsChecked -eq $true) {
-                    if ($window.FindName("NPCheckbox").IsChecked -eq $true) { $conflictMessage = "/ETA conflicts with /NP"; $window.FindName("NPCheckbox").IsChecked = $false }
-                }
-            }
             "NPCheckbox" {
                 if ($checkbox.IsChecked -eq $true) {
                     if ($window.FindName("ETACheckbox").IsChecked -eq $true) { $conflictMessage = "/NP conflicts with /ETA"; $window.FindName("ETACheckbox").IsChecked = $false }
+                }
+            }
+            "ETACheckbox" {
+                if ($checkbox.IsChecked -eq $true) {
+                    if ($window.FindName("NPCheckbox").IsChecked -eq $true) { $conflictMessage = "/ETA conflicts with /NP"; $window.FindName("NPCheckbox").IsChecked = $false }
                 }
             }
             "RestartableCheckbox" {
@@ -247,12 +262,12 @@ function Show-RobocopyGui {
             }
             "LogPlusCheckbox" {
                 if ($checkbox.IsChecked -eq $true) {
-                    if ($window.FindName("TECheckbox").IsChecked -eq $true) { $conflictMessage = "/LOG+ conflicts with /TEE"; $window.FindName("TECheckbox").IsChecked = $false }
+                    if ($window.FindName("LogCheckbox").IsChecked -eq $true) { $conflictMessage = "/LOG+ conflicts with /LOG"; $window.FindName("LogCheckbox").IsChecked = $false }
                 }
             }
-            "TECheckbox" {
+            "LogCheckbox" {
                 if ($checkbox.IsChecked -eq $true) {
-                    if ($window.FindName("LogPlusCheckbox").IsChecked -eq $true) { $conflictMessage = "/TEE conflicts with /LOG+"; $window.FindName("LogPlusCheckbox").IsChecked = $false }
+                    if ($window.FindName("LogPlusCheckbox").IsChecked -eq $true) { $conflictMessage = "/LOG conflicts with /LOG+"; $window.FindName("LogPlusCheckbox").IsChecked = $false }
                 }
             }
             "NoSourceDirCheckbox" {
@@ -270,189 +285,83 @@ function Show-RobocopyGui {
         # Check for multiple conflicting options
         if ($window.FindName("MirrorCheckbox").IsChecked -eq $true -and ($window.FindName("IncludeSubdirectoriesCheckbox").IsChecked -eq $true -or $window.FindName("IncludeEmptySubdirectoriesCheckbox").IsChecked -eq $true -or $window.FindName("PurgeCheckbox").IsChecked -eq $true -or $window.FindName("NoSourceDirCheckbox").IsChecked -eq $true -or $window.FindName("MOVCheckbox").IsChecked -eq $true)) {
             $incompatibleSwitches += "/MIR conflicts with /S, /E, /PURGE, /NOSD, /MOV"
-            $conflict = $true
         }
         if ($window.FindName("IncludeSubdirectoriesCheckbox").IsChecked -eq $true -and $window.FindName("IncludeEmptySubdirectoriesCheckbox").IsChecked -eq $true) {
             $incompatibleSwitches += "/S conflicts with /E"
-            $conflict = $true
         }
         if ($window.FindName("SecCheckbox").IsChecked -eq $true -and $window.FindName("CopyDATSCheckbox").IsChecked -eq $true) {
             $incompatibleSwitches += "/SEC conflicts with /COPY:DATS"
-            $conflict = $true
         }
         if ($window.FindName("NPCheckbox").IsChecked -eq $true -and $window.FindName("ETACheckbox").IsChecked -eq $true) {
             $incompatibleSwitches += "/NP conflicts with /ETA"
-            $conflict = $true
         }
         if ($window.FindName("BackupModeCheckbox").IsChecked -eq $true -and $window.FindName("RestartableCheckbox").IsChecked -eq $true) {
             $incompatibleSwitches += "/B conflicts with /Z"
-            $conflict = $true
         }
-        if ($window.FindName("LogPlusCheckbox").IsChecked -eq $true -and $window.FindName("TECheckbox").IsChecked -eq $true) {
-            $incompatibleSwitches += "/LOG+ conflicts with /TEE"
-            $conflict = $true
+        if ($window.FindName("LogPlusCheckbox").IsChecked -eq $true -and $window.FindName("LogCheckbox").IsChecked -eq $true) {
+            $incompatibleSwitches += "/LOG+ conflicts with /LOG"
         }
         if ($window.FindName("NoSourceDirCheckbox").IsChecked -eq $true -and $window.FindName("MirrorCheckbox").IsChecked -eq $true) {
             $incompatibleSwitches += "/NOSD conflicts with /MIR"
-            $conflict = $true
         }
         if ($window.FindName("MOVCheckbox").IsChecked -eq $true -and $window.FindName("MirrorCheckbox").IsChecked -eq $true) {
             $incompatibleSwitches += "/MOV conflicts with /MIR"
-            $conflict = $true
         }
 
-        if ($conflict -or $conflictMessage) {
+        if ($incompatibleSwitches.Count -gt 0) {
             $message = $conflictMessage
             if ($incompatibleSwitches.Count -gt 0) {
                 $message += ". Additional conflicts: " + ($incompatibleSwitches -join ", ")
             }
             ShowErrorMessage($message)
         } else {
-            $window.FindName("ErrorMessage").Text = ""
+            $window.Dispatcher.Invoke([action] {
+                $window.FindName("ErrorMessage").Text = ""
+            })
         }
     }
 
     # Add event handlers to checkboxes
-    foreach ($child in $window.FindName("FileSelectionOptionsPanel").Children) {
-        if ($child.GetType().Name -eq "CheckBox") {
-            $child.Add_Checked({
-                param ($cbSender, $e)
-                HandleCheckboxChange $cbSender
-            })
-            $child.Add_Unchecked({
-                param ($cbSender, $e)
-                HandleCheckboxChange $cbSender
-            })
-        } elseif ($child.GetType().Name -eq "StackPanel") {
-            foreach ($grandchild in $child.Children) {
-                if ($grandchild.GetType().Name -eq "CheckBox") {
-                    $grandchild.Add_Checked({
+    $panels = @(
+        "CommonOptionsPanel",
+        "FileSelectionOptionsPanel",
+        "RetryOptionsPanel",
+        "LoggingOptionsPanel",
+        "JobOptionsPanel",
+        "AdvancedOptionsPanel",
+        "MultithreadingOptionsPanel",
+        "NetworkOptionsPanel",
+        "CopyOptionsPanel"
+    )
+
+    foreach ($panelName in $panels) {
+        $panel = $window.FindName($panelName)
+        if ($null -ne $panel) {
+            foreach ($child in $panel.Children) {
+                if ($child.GetType().Name -eq "CheckBox") {
+                    $child.Add_Checked({
                         param ($cbSender, $e)
                         HandleCheckboxChange $cbSender
                     })
-                    $grandchild.Add_Unchecked({
+                    $child.Add_Unchecked({
                         param ($cbSender, $e)
                         HandleCheckboxChange $cbSender
                     })
+                } elseif ($child.GetType().Name -eq "StackPanel") {
+                    foreach ($grandchild in $child.Children) {
+                        if ($grandchild.GetType().Name -eq "CheckBox") {
+                            $grandchild.Add_Checked({
+                                param ($cbSender, $e)
+                                HandleCheckboxChange $cbSender
+                            })
+                            $grandchild.Add_Unchecked({
+                                param ($cbSender, $e)
+                                HandleCheckboxChange $cbSender
+                            })
+                        }
+                    }
                 }
             }
-        }
-    }
-
-    foreach ($child in $window.FindName("RetryOptionsPanel").Children) {
-        if ($child.GetType().Name -eq "CheckBox") {
-            $child.Add_Checked({
-                param ($cbSender, $e)
-                HandleCheckboxChange $cbSender
-            })
-            $child.Add_Unchecked({
-                param ($cbSender, $e)
-                HandleCheckboxChange $cbSender
-            })
-        } elseif ($child.GetType().Name -eq "StackPanel") {
-            foreach ($grandchild in $child.Children) {
-                if ($grandchild.GetType().Name -eq "CheckBox") {
-                    $grandchild.Add_Checked({
-                        param ($cbSender, $e)
-                        HandleCheckboxChange $cbSender
-                    })
-                    $grandchild.Add_Unchecked({
-                        param ($cbSender, $e)
-                        HandleCheckboxChange $cbSender
-                    })
-                }
-            }
-        }
-    }
-
-    foreach ($child in $window.FindName("LoggingOptionsPanel").Children) {
-        if ($child.GetType().Name -eq "CheckBox") {
-            $child.Add_Checked({
-                param ($cbSender, $e)
-                HandleCheckboxChange $cbSender
-            })
-            $child.Add_Unchecked({
-                param ($cbSender, $e)
-                HandleCheckboxChange $cbSender
-            })
-        }
-    }
-
-    foreach ($child in $window.FindName("JobOptionsPanel").Children) {
-        if ($child.GetType().Name -eq "CheckBox") {
-            $child.Add_Checked({
-                param ($cbSender, $e)
-                HandleCheckboxChange $cbSender
-            })
-            $child.Add_Unchecked({
-                param ($cbSender, $e)
-                HandleCheckboxChange $cbSender
-            })
-        } elseif ($child.GetType().Name -eq "StackPanel") {
-            foreach ($grandchild in $child.Children) {
-                if ($grandchild.GetType().Name -eq "CheckBox") {
-                    $grandchild.Add_Checked({
-                        param ($cbSender, $e)
-                        HandleCheckboxChange $cbSender
-                    })
-                    $grandchild.Add_Unchecked({
-                        param ($cbSender, $e)
-                        HandleCheckboxChange $cbSender
-                    })
-                }
-            }
-        }
-    }
-
-    foreach ($child in $window.FindName("AdvancedOptionsPanel").Children) {
-        if ($child.GetType().Name -eq "CheckBox") {
-            $child.Add_Checked({
-                param ($cbSender, $e)
-                HandleCheckboxChange $cbSender
-            })
-            $child.Add_Unchecked({
-                param ($cbSender, $e)
-                HandleCheckboxChange $cbSender
-            })
-        }
-    }
-
-    foreach ($child in $window.FindName("MultithreadingOptionsPanel").Children) {
-        if ($child.GetType().Name -eq "CheckBox") {
-            $child.Add_Checked({
-                param ($cbSender, $e)
-                HandleCheckboxChange $cbSender
-            })
-            $child.Add_Unchecked({
-                param ($cbSender, $e)
-                HandleCheckboxChange $cbSender
-            })
-        }
-    }
-
-    foreach ($child in $window.FindName("NetworkOptionsPanel").Children) {
-        if ($child.GetType().Name -eq "CheckBox") {
-            $child.Add_Checked({
-                param ($cbSender, $e)
-                HandleCheckboxChange $cbSender
-            })
-            $child.Add_Unchecked({
-                param ($cbSender, $e)
-                HandleCheckboxChange $cbSender
-            })
-        }
-    }
-
-    foreach ($child in $window.FindName("CopyOptionsPanel").Children) {
-        if ($child.GetType().Name -eq "CheckBox") {
-            $child.Add_Checked({
-                param ($cbSender, $e)
-                HandleCheckboxChange $cbSender
-            })
-            $child.Add_Unchecked({
-                param ($cbSender, $e)
-                HandleCheckboxChange $cbSender
-            })
         }
     }
 
@@ -460,7 +369,9 @@ function Show-RobocopyGui {
         Add-Type -AssemblyName System.Windows.Forms
         $folderDialog = New-Object System.Windows.Forms.FolderBrowserDialog
         if ($folderDialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
-            $window.FindName("SourceTextBox").Text = '"' + $folderDialog.SelectedPath + '"'
+            $window.Dispatcher.Invoke([action] {
+                $window.FindName("SourceTextBox").Text = '"' + $folderDialog.SelectedPath + '"'
+            })
         }
     })
 
@@ -468,7 +379,9 @@ function Show-RobocopyGui {
         Add-Type -AssemblyName System.Windows.Forms
         $folderDialog = New-Object System.Windows.Forms.FolderBrowserDialog
         if ($folderDialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
-            $window.FindName("DestinationTextBox").Text = '"' + $folderDialog.SelectedPath + '"'
+            $window.Dispatcher.Invoke([action] {
+                $window.FindName("DestinationTextBox").Text = '"' + $folderDialog.SelectedPath + '"'
+            })
         }
     })
 
@@ -528,6 +441,7 @@ function Show-RobocopyGui {
         if ($window.FindName("NPCheckbox").IsChecked -eq $true) { $options += "/NP " }
         if ($window.FindName("LogCheckbox").IsChecked -eq $true) { $options += "/LOG " }
         if ($window.FindName("LogPlusCheckbox").IsChecked -eq $true) { $options += "/LOG+ " }
+        if ($window.FindName("ETACheckbox").IsChecked -eq $true) { $options += "/ETA " }
         if ($window.FindName("JobCheckbox").IsChecked -eq $true) {
             $jobValue = $window.FindName("JobValueTextBox").Text.Trim('"')
             if ($jobValue) {
