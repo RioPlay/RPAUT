@@ -29,7 +29,7 @@ Add-Type -AssemblyName System.Windows.Forms
 function Show-RobocopyGui {
     [xml]$xaml = @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        Title="Robocopy GUI" Height="600" Width="800" WindowStartupLocation="CenterScreen">
+        Title="Robocopy GUI" Height="700" Width="800" WindowStartupLocation="CenterScreen">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -116,6 +116,25 @@ function Show-RobocopyGui {
                     <StackPanel Orientation="Horizontal" Margin="5">
                         <CheckBox Name="IPGCheckbox" Content="/IPG - Inter-Packet Gap (ms)" Margin="5"/>
                         <TextBox Name="IPGValueTextBox" Width="50" Margin="5"/>
+                    </StackPanel>
+                    <CheckBox Name="MOVCheckbox" Content="/MOV - Moves files and directories" Margin="5"/>
+                    <CheckBox Name="SecCheckbox" Content="/SEC - Copy files with security (equivalent to /COPY:DATS)" Margin="5"/>
+                    <CheckBox Name="MCheckbox" Content="/M - Copy only files with the archive attribute set" Margin="5"/>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <CheckBox Name="MinAgeCheckbox" Content="/MINAGE - Exclude files newer than n days/date" Margin="5"/>
+                        <TextBox Name="MinAgeValueTextBox" Width="150" Margin="5"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <CheckBox Name="MaxAgeCheckbox" Content="/MAXAGE - Exclude files older than n days/date" Margin="5"/>
+                        <TextBox Name="MaxAgeValueTextBox" Width="150" Margin="5"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <CheckBox Name="MinLADCheckbox" Content="/MINLAD - Exclude files newer than n Last Access Date" Margin="5"/>
+                        <TextBox Name="MinLADValueTextBox" Width="150" Margin="5"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <CheckBox Name="MaxLADCheckbox" Content="/MAXLAD - Exclude files older than n Last Access Date" Margin="5"/>
+                        <TextBox Name="MaxLADValueTextBox" Width="150" Margin="5"/>
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
@@ -336,6 +355,33 @@ function Show-RobocopyGui {
             } else {
                 $window.FindName("ErrorMessage").Text = "Invalid /IPG value. It should be a number."
                 return
+            }
+        }
+        if ($window.FindName("MOVCheckbox").IsChecked -eq $true) { $options += "/MOV " }
+        if ($window.FindName("SecCheckbox").IsChecked -eq $true) { $options += "/SEC " }
+        if ($window.FindName("MCheckbox").IsChecked -eq $true) { $options += "/M " }
+        if ($window.FindName("MinAgeCheckbox").IsChecked -eq $true) {
+            $minAgeValue = $window.FindName("MinAgeValueTextBox").Text.Trim('"')
+            if ($minAgeValue) {
+                $options += "/MINAGE:$minAgeValue "
+            }
+        }
+        if ($window.FindName("MaxAgeCheckbox").IsChecked -eq $true) {
+            $maxAgeValue = $window.FindName("MaxAgeValueTextBox").Text.Trim('"')
+            if ($maxAgeValue) {
+                $options += "/MAXAGE:$maxAgeValue "
+            }
+        }
+        if ($window.FindName("MinLADCheckbox").IsChecked -eq $true) {
+            $minLADValue = $window.FindName("MinLADValueTextBox").Text.Trim('"')
+            if ($minLADValue) {
+                $options += "/MINLAD:$minLADValue "
+            }
+        }
+        if ($window.FindName("MaxLADCheckbox").IsChecked -eq $true) {
+            $maxLADValue = $window.FindName("MaxLADValueTextBox").Text.Trim('"')
+            if ($maxLADValue) {
+                $options += "/MAXLAD:$maxLADValue "
             }
         }
 
