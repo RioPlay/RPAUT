@@ -190,7 +190,7 @@ function Show-RobocopyGui {
         Add-Type -AssemblyName System.Windows.Forms
         $folderDialog = New-Object System.Windows.Forms.FolderBrowserDialog
         if ($folderDialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
-            $window.FindName("SourceTextBox").Text = $folderDialog.SelectedPath
+            $window.FindName("SourceTextBox").Text = '"' + $folderDialog.SelectedPath + '"'
         }
     })
 
@@ -198,13 +198,13 @@ function Show-RobocopyGui {
         Add-Type -AssemblyName System.Windows.Forms
         $folderDialog = New-Object System.Windows.Forms.FolderBrowserDialog
         if ($folderDialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
-            $window.FindName("DestinationTextBox").Text = $folderDialog.SelectedPath
+            $window.FindName("DestinationTextBox").Text = '"' + $folderDialog.SelectedPath + '"'
         }
     })
 
     $window.FindName("RunButton").Add_Click({
-        $source = $window.FindName("SourceTextBox").Text.Trim('"')
-        $destination = $window.FindName("DestinationTextBox").Text.Trim('"')
+        $source = $window.FindName("SourceTextBox").Text
+        $destination = $window.FindName("DestinationTextBox").Text
         $options = ""
 
         # Ensure the correct order of options
@@ -289,8 +289,8 @@ function Show-RobocopyGui {
             $window.FindName("ErrorMessage").Text = ""
         }
 
-        $command = "Robocopy `"$source`" `"$destination`" $options"
-        Start-Process powershell -ArgumentList "-NoExit", "-Command", $command
+        $command = "Robocopy '$source' '$destination' $options"
+        Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit", "-Command", $command
     })
 
     $window.ShowDialog() | Out-Null
