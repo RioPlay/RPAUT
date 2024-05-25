@@ -56,7 +56,7 @@ function Show-RobocopyGui {
         <GroupBox Header="Options" Grid.Row="2" Grid.ColumnSpan="3" Margin="5">
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                 <StackPanel Margin="5">
-                    <CheckBox Name="MirrorCheckbox" Content="/MIR - Mirror a directory tree" Margin="5"/>
+                    <CheckBox Name="MirrorCheckbox" Content="/MIR - Mirror a directory tree (equivalent to /E plus /PURGE)" Margin="5"/>
                     <CheckBox Name="PurgeCheckbox" Content="/PURGE - Delete dest files/dirs that no longer exist in source" Margin="5"/>
                     <CheckBox Name="RestartableCheckbox" Content="/Z - Restartable mode" Margin="5"/>
                     <CheckBox Name="BackupModeCheckbox" Content="/B - Backup mode" Margin="5"/>
@@ -70,7 +70,7 @@ function Show-RobocopyGui {
                         <TextBlock VerticalAlignment="Center" Margin="5">/MT value (1-128):</TextBlock>
                         <TextBox Name="MTValueTextBox" Width="50" Margin="5"/>
                     </StackPanel>
-                    <CheckBox Name="CopyAllCheckbox" Content="/COPYALL - Copy all file info" Margin="5"/>
+                    <CheckBox Name="CopyAllCheckbox" Content="/COPYALL - Copy all file info (equivalent to /COPY:DATSOU)" Margin="5"/>
                     <CheckBox Name="CopyDATSCheckbox" Content="/COPY:DATS - Copy Data, Attributes, Timestamps, Security" Margin="5"/>
                     <CheckBox Name="DCopyCheckbox" Content="/DCOPY:T - Copy directory timestamps" Margin="5"/>
                     <CheckBox Name="NPCheckbox" Content="/NP - No progress - don't display % copied" Margin="5"/>
@@ -92,7 +92,31 @@ function Show-RobocopyGui {
                         <CheckBox Name="XDCheckbox" Content="/XD - Exclude directories" Margin="5"/>
                         <TextBox Name="XDValueTextBox" Width="150" Margin="5"/>
                     </StackPanel>
-                    <!-- Add more checkboxes for other switches as needed -->
+                    <CheckBox Name="SECFixCheckbox" Content="/SECFIX - Fix file security on all files, even skipped ones" Margin="5"/>
+                    <CheckBox Name="TIMFixCheckbox" Content="/TIMFIX - Fix file times on all files, even skipped ones" Margin="5"/>
+                    <CheckBox Name="XOCheckbox" Content="/XO - Exclude older files" Margin="5"/>
+                    <CheckBox Name="XNCheckbox" Content="/XN - Exclude newer files" Margin="5"/>
+                    <CheckBox Name="XCCheckbox" Content="/XC - Exclude changed files" Margin="5"/>
+                    <CheckBox Name="XXCheckbox" Content="/XX - Exclude extra files and directories" Margin="5"/>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <CheckBox Name="XACheckbox" Content="/XA - Exclude files with the given attributes" Margin="5"/>
+                        <TextBox Name="XAValueTextBox" Width="150" Margin="5"/>
+                    </StackPanel>
+                    <CheckBox Name="DSTCheckbox" Content="/DST - Compensate for one-hour DST time differences" Margin="5"/>
+                    <CheckBox Name="NoDirEpochCheckbox" Content="/NODCOPY - Do not copy directory timestamps" Margin="5"/>
+                    <CheckBox Name="TBDCheckbox" Content="/TBD - Wait for share names to be defined" Margin="5"/>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <CheckBox Name="RHCheckbox" Content="/RH - Run hours (time range for starting new copies)" Margin="5"/>
+                        <TextBox Name="RHValueTextBox" Width="150" Margin="5"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <CheckBox Name="PFCheckbox" Content="/PF - Check run hours on a per-file basis" Margin="5"/>
+                        <TextBox Name="PFValueTextBox" Width="150" Margin="5"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <CheckBox Name="IPGCheckbox" Content="/IPG - Inter-Packet Gap (ms)" Margin="5"/>
+                        <TextBox Name="IPGValueTextBox" Width="50" Margin="5"/>
+                    </StackPanel>
                 </StackPanel>
             </ScrollViewer>
         </GroupBox>
@@ -127,6 +151,12 @@ function Show-RobocopyGui {
         }
         if ($window.FindName("NPCheckbox").IsChecked -eq $true -and $window.FindName("ETACheckbox").IsChecked -eq $true) {
             $incompatibleSwitches += "/NP and /ETA"
+        }
+        if ($window.FindName("MirrorCheckbox").IsChecked -eq $true -and $window.FindName("NoDirEpochCheckbox").IsChecked -eq $true) {
+            $incompatibleSwitches += "/MIR and /NODCOPY"
+        }
+        if ($window.FindName("DCopyCheckbox").IsChecked -eq $true -and $window.FindName("NoDirEpochCheckbox").IsChecked -eq $true) {
+            $incompatibleSwitches += "/DCOPY:T and /NODCOPY"
         }
         if ($incompatibleSwitches.Count -gt 0) {
             $errorMessage = "The following switches are incompatible: " + ($incompatibleSwitches -join ", ")
@@ -183,6 +213,18 @@ function Show-RobocopyGui {
         CheckForIncompatibleOptions
     })
     $window.FindName("NPCheckbox").Add_Unchecked({
+        CheckForIncompatibleOptions
+    })
+    $window.FindName("NoDirEpochCheckbox").Add_Checked({
+        CheckForIncompatibleOptions
+    })
+    $window.FindName("NoDirEpochCheckbox").Add_Unchecked({
+        CheckForIncompatibleOptions
+    })
+    $window.FindName("DCopyCheckbox").Add_Checked({
+        CheckForIncompatibleOptions
+    })
+    $window.FindName("DCopyCheckbox").Add_Unchecked({
         CheckForIncompatibleOptions
     })
 
@@ -260,6 +302,42 @@ function Show-RobocopyGui {
                 $options += "/XD `"$xdValue`" "
             }
         }
+        if ($window.FindName("SECFixCheckbox").IsChecked -eq $true) { $options += "/SECFIX " }
+        if ($window.FindName("TIMFixCheckbox").IsChecked -eq $true) { $options += "/TIMFIX " }
+        if ($window.FindName("XOCheckbox").IsChecked -eq $true) { $options += "/XO " }
+        if ($window.FindName("XNCheckbox").IsChecked -eq $true) { $options += "/XN " }
+        if ($window.FindName("XCCheckbox").IsChecked -eq $true) { $options += "/XC " }
+        if ($window.FindName("XXCheckbox").IsChecked -eq $true) { $options += "/XX " }
+        if ($window.FindName("XACheckbox").IsChecked -eq $true) {
+            $xaValue = $window.FindName("XAValueTextBox").Text.Trim('"')
+            if ($xaValue) {
+                $options += "/XA `"$xaValue`" "
+            }
+        }
+        if ($window.FindName("DSTCheckbox").IsChecked -eq $true) { $options += "/DST " }
+        if ($window.FindName("NoDirEpochCheckbox").IsChecked -eq $true) { $options += "/NODCOPY " }
+        if ($window.FindName("TBDCheckbox").IsChecked -eq $true) { $options += "/TBD " }
+        if ($window.FindName("RHCheckbox").IsChecked -eq $true) {
+            $rhValue = $window.FindName("RHValueTextBox").Text.Trim('"')
+            if ($rhValue) {
+                $options += "/RH:$rhValue "
+            }
+        }
+        if ($window.FindName("PFCheckbox").IsChecked -eq $true) {
+            $pfValue = $window.FindName("PFValueTextBox").Text.Trim('"')
+            if ($pfValue) {
+                $options += "/PF:$pfValue "
+            }
+        }
+        if ($window.FindName("IPGCheckbox").IsChecked -eq $true) {
+            $ipgValue = $window.FindName("IPGValueTextBox").Text
+            if ($ipgValue -match '^\d+$') {
+                $options += "/IPG:$ipgValue "
+            } else {
+                $window.FindName("ErrorMessage").Text = "Invalid /IPG value. It should be a number."
+                return
+            }
+        }
 
         # Error checking for incompatible switches
         $incompatibleSwitches = @()
@@ -280,6 +358,12 @@ function Show-RobocopyGui {
         }
         if ($window.FindName("NPCheckbox").IsChecked -eq $true -and $window.FindName("ETACheckbox").IsChecked -eq $true) {
             $incompatibleSwitches += "/NP and /ETA"
+        }
+        if ($window.FindName("MirrorCheckbox").IsChecked -eq $true -and $window.FindName("NoDirEpochCheckbox").IsChecked -eq $true) {
+            $incompatibleSwitches += "/MIR and /NODCOPY"
+        }
+        if ($window.FindName("DCopyCheckbox").IsChecked -eq $true -and $window.FindName("NoDirEpochCheckbox").IsChecked -eq $true) {
+            $incompatibleSwitches += "/DCOPY:T and /NODCOPY"
         }
         if ($incompatibleSwitches.Count -gt 0) {
             $errorMessage = "The following switches are incompatible: " + ($incompatibleSwitches -join ", ")
