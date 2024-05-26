@@ -1,9 +1,3 @@
-<#
-MIT License
-
-...
-#>
-
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName System.Windows.Forms
 
@@ -53,6 +47,11 @@ function Show-RobocopyGui {
                         <CheckBox Name="RestartableCheckbox" Content="/Z - Restartable mode" Margin="5"/>
                         <CheckBox Name="BackupModeCheckbox" Content="/B - Backup mode" Margin="5"/>
                         <CheckBox Name="SecCheckbox" Content="/SEC - Copy files with SECurity (equivalent to /COPY:DATS)" Margin="5"/>
+                        <CheckBox Name="CopyAllCheckbox" Content="/COPYALL - Copy all file info (equivalent to /COPY:DATSOU)" Margin="5"/>
+                        <CheckBox Name="NoDCopyCheckbox" Content="/NODCOPY - Disable directory copy" Margin="5"/>
+                        <CheckBox Name="EFSRawCheckbox" Content="/EFSRAW - Copy all encrypted files in EFS RAW mode" Margin="5"/>
+                        <CheckBox Name="SecFixCheckbox" Content="/SECFIX - Fix file SECurity on all files, even skipped files" Margin="5"/>
+                        <CheckBox Name="TimFixCheckbox" Content="/TIMFIX - Fix file TIMes on all files, even skipped files" Margin="5"/>
                     </StackPanel>
                 </GroupBox>
 
@@ -68,6 +67,34 @@ function Show-RobocopyGui {
                             <CheckBox Name="ExcludeAttributesCheckbox" Content="/XA - Exclude files with any of the given attributes" Margin="5"/>
                             <TextBox Name="XAValueTextBox" Width="150" Margin="5"/>
                         </StackPanel>
+                        <CheckBox Name="XOChekbox" Content="/XO - Exclude Older files" Margin="5"/>
+                        <CheckBox Name="XNCheckbox" Content="/XN - Exclude Newer files" Margin="5"/>
+                        <CheckBox Name="XCCheckbox" Content="/XC - Exclude Changed files" Margin="5"/>
+                        <CheckBox Name="XXCheckbox" Content="/XX - Exclude Extra files and directories" Margin="5"/>
+                        <CheckBox Name="XLCheckbox" Content="/XL - Exclude Lonely files and directories" Margin="5"/>
+                        <CheckBox Name="ISCheckbox" Content="/IS - Include Same files" Margin="5"/>
+                        <CheckBox Name="ITCheckbox" Content="/IT - Include Tweaked files" Margin="5"/>
+                        <StackPanel Orientation="Horizontal" Margin="5">
+                            <CheckBox Name="MaxAgeCheckbox" Content="/MAXAGE - MAXimum file AGE" Margin="5"/>
+                            <TextBox Name="MaxAgeValueTextBox" Width="50" Margin="5"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="5">
+                            <CheckBox Name="MinAgeCheckbox" Content="/MINAGE - MINimum file AGE" Margin="5"/>
+                            <TextBox Name="MinAgeValueTextBox" Width="50" Margin="5"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="5">
+                            <CheckBox Name="MaxLADCheckbox" Content="/MAXLAD - MAXimum Last Access Date" Margin="5"/>
+                            <TextBox Name="MaxLADValueTextBox" Width="50" Margin="5"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="5">
+                            <CheckBox Name="MinLADCheckbox" Content="/MINLAD - MINimum Last Access Date" Margin="5"/>
+                            <TextBox Name="MinLADValueTextBox" Width="50" Margin="5"/>
+                        </StackPanel>
+                        <CheckBox Name="FFTCheckbox" Content="/FFT - Assume FAT File Times (2-second granularity)" Margin="5"/>
+                        <CheckBox Name="DSTCheckbox" Content="/DST - Compensate for one-hour DST time differences" Margin="5"/>
+                        <CheckBox Name="XJCheckbox" Content="/XJ - Exclude Junction points for directories" Margin="5"/>
+                        <CheckBox Name="JHCheckbox" Content="/JH - Copy symbolic link instead of the target" Margin="5"/>
+                        <CheckBox Name="NoOffloadCheckbox" Content="/NOOFFLOAD - Copy files without using the Windows Copy Offload mechanism" Margin="5"/>
                     </StackPanel>
                 </GroupBox>
 
@@ -93,6 +120,7 @@ function Show-RobocopyGui {
                         <CheckBox Name="LogCheckbox" Content="/LOG - Output status to LOG file (overwrite existing log)" Margin="5"/>
                         <CheckBox Name="LogPlusCheckbox" Content="/LOG+ - Output status to LOG file (append to existing log)" Margin="5"/>
                         <CheckBox Name="ETACheckbox" Content="/ETA - Show estimated time of arrival for copied files" Margin="5"/>
+                        <CheckBox Name="TSCheckbox" Content="/TS - Include source file timestamps in the output" Margin="5"/>
                     </StackPanel>
                 </GroupBox>
 
@@ -109,6 +137,8 @@ function Show-RobocopyGui {
                         <CheckBox Name="QuitCheckbox" Content="/QUIT - Quit after processing command line (to view parameters)" Margin="5"/>
                         <CheckBox Name="NoSourceDirCheckbox" Content="/NOSD - No source directory is specified" Margin="5"/>
                         <CheckBox Name="NoDestDirCheckbox" Content="/NODD - No destination directory is specified" Margin="5"/>
+                        <CheckBox Name="IFCheckbox" Content="/IF - Include the following files" Margin="5"/>
+                        <TextBox Name="IFValueTextBox" Width="150" Margin="5"/>
                     </StackPanel>
                 </GroupBox>
 
@@ -143,6 +173,12 @@ function Show-RobocopyGui {
                             <CheckBox Name="RemoveAttrCheckbox" Content="/A- - Remove the given attributes from copied files" Margin="5"/>
                             <TextBox Name="RemoveAttrTextBox" Width="150" Margin="5"/>
                         </StackPanel>
+                        <CheckBox Name="COMPRESSCheckbox" Content="/COMPRESS - Request network compression during file transfer" Margin="5"/>
+                        <CheckBox Name="MTSCCheckbox" Content="/MTSC - Multi-threaded for copying files" Margin="5"/>
+                        <StackPanel Orientation="Horizontal" Margin="5">
+                            <CheckBox Name="UNILOGCheckbox" Content="/UNILOG - Output status to LOG file as Unicode text (overwrite existing log)" Margin="5"/>
+                            <TextBox Name="UNILOGValueTextBox" Width="150" Margin="5"/>
+                        </StackPanel>
                     </StackPanel>
                 </GroupBox>
 
@@ -169,6 +205,8 @@ function Show-RobocopyGui {
                     <StackPanel Name="CopyOptionsPanel" Margin="5">
                         <CheckBox Name="ZBCheckbox" Content="/ZB - Use restartable mode; if access denied use Backup mode" Margin="5"/>
                         <CheckBox Name="JCheckbox" Content="/J - Copy using unbuffered I/O (recommended for large files)" Margin="5"/>
+                        <CheckBox Name="MoveCheckbox" Content="/MOVE - Move files and directories, and delete from source after copying" Margin="5"/>
+                        <CheckBox Name="MovCheckbox" Content="/MOV - Move files, and delete from source after copying" Margin="5"/>
                     </StackPanel>
                 </GroupBox>
 
@@ -215,7 +253,7 @@ function Show-RobocopyGui {
                     if ($window.FindName("IncludeEmptySubdirectoriesCheckbox").IsChecked -eq $true) { $conflictMessage = "/MIR conflicts with /E"; $window.FindName("IncludeEmptySubdirectoriesCheckbox").IsChecked = $false }
                     if ($window.FindName("PurgeCheckbox").IsChecked -eq $true) { $conflictMessage = "/MIR conflicts with /PURGE"; $window.FindName("PurgeCheckbox").IsChecked = $false }
                     if ($window.FindName("NoSourceDirCheckbox").IsChecked -eq $true) { $conflictMessage = "/MIR conflicts with /NOSD"; $window.FindName("NoSourceDirCheckbox").IsChecked = $false }
-                    if ($window.FindName("MOVCheckbox").IsChecked -eq $true) { $conflictMessage = "/MIR conflicts with /MOV"; $window.FindName("MOVCheckbox").IsChecked = $false }
+                    if ($window.FindName("MovCheckbox").IsChecked -eq $true) { $conflictMessage = "/MIR conflicts with /MOV"; $window.FindName("MovCheckbox").IsChecked = $false }
                 }
             }
             "IncludeSubdirectoriesCheckbox" {
@@ -275,7 +313,7 @@ function Show-RobocopyGui {
                     if ($window.FindName("MirrorCheckbox").IsChecked -eq $true) { $conflictMessage = "/NOSD conflicts with /MIR"; $window.FindName("MirrorCheckbox").IsChecked = $false }
                 }
             }
-            "MOVCheckbox" {
+            "MovCheckbox" {
                 if ($checkbox.IsChecked -eq $true) {
                     if ($window.FindName("MirrorCheckbox").IsChecked -eq $true) { $conflictMessage = "/MOV conflicts with /MIR"; $window.FindName("MirrorCheckbox").IsChecked = $false }
                 }
@@ -283,7 +321,7 @@ function Show-RobocopyGui {
         }
 
         # Check for multiple conflicting options
-        if ($window.FindName("MirrorCheckbox").IsChecked -eq $true -and ($window.FindName("IncludeSubdirectoriesCheckbox").IsChecked -eq $true -or $window.FindName("IncludeEmptySubdirectoriesCheckbox").IsChecked -eq $true -or $window.FindName("PurgeCheckbox").IsChecked -eq $true -or $window.FindName("NoSourceDirCheckbox").IsChecked -eq $true -or $window.FindName("MOVCheckbox").IsChecked -eq $true)) {
+        if ($window.FindName("MirrorCheckbox").IsChecked -eq $true -and ($window.FindName("IncludeSubdirectoriesCheckbox").IsChecked -eq $true -or $window.FindName("IncludeEmptySubdirectoriesCheckbox").IsChecked -eq $true -or $window.FindName("PurgeCheckbox").IsChecked -eq $true -or $window.FindName("NoSourceDirCheckbox").IsChecked -eq $true -or $window.FindName("MovCheckbox").IsChecked -eq $true)) {
             $incompatibleSwitches += "/MIR conflicts with /S, /E, /PURGE, /NOSD, /MOV"
         }
         if ($window.FindName("IncludeSubdirectoriesCheckbox").IsChecked -eq $true -and $window.FindName("IncludeEmptySubdirectoriesCheckbox").IsChecked -eq $true) {
@@ -304,7 +342,7 @@ function Show-RobocopyGui {
         if ($window.FindName("NoSourceDirCheckbox").IsChecked -eq $true -and $window.FindName("MirrorCheckbox").IsChecked -eq $true) {
             $incompatibleSwitches += "/NOSD conflicts with /MIR"
         }
-        if ($window.FindName("MOVCheckbox").IsChecked -eq $true -and $window.FindName("MirrorCheckbox").IsChecked -eq $true) {
+        if ($window.FindName("MovCheckbox").IsChecked -eq $true -and $window.FindName("MirrorCheckbox").IsChecked -eq $true) {
             $incompatibleSwitches += "/MOV conflicts with /MIR"
         }
 
@@ -461,7 +499,7 @@ function Show-RobocopyGui {
         if ($window.FindName("CopyDATSCheckbox").IsChecked -eq $true) { $options += "/COPY:DATS " }
         if ($window.FindName("DCopyCheckbox").IsChecked -eq $true) { $options += "/DCOPY:T " }
         if ($window.FindName("PurgeCheckbox").IsChecked -eq $true) { $options += "/PURGE " }
-        if ($window.FindName("MOVCheckbox").IsChecked -eq $true) { $options += "/MOV " }
+        if ($window.FindName("MovCheckbox").IsChecked -eq $true) { $options += "/MOV " }
         if ($window.FindName("MoveCheckbox").IsChecked -eq $true) { $options += "/MOVE " }
         if ($window.FindName("AddAttrCheckbox").IsChecked -eq $true) {
             $addAttrValue = $window.FindName("AddAttrTextBox").Text.Trim('"')
@@ -524,6 +562,21 @@ function Show-RobocopyGui {
         if ($window.FindName("BackupModeCheckbox").IsChecked -eq $true) { $options += "/B " }
         if ($window.FindName("ZBCheckbox").IsChecked -eq $true) { $options += "/ZB " }
         if ($window.FindName("JCheckbox").IsChecked -eq $true) { $options += "/J " }
+        if ($window.FindName("TSCheckbox").IsChecked -eq $true) { $options += "/TS " }
+        if ($window.FindName("IFCheckbox").IsChecked -eq $true) {
+            $ifValue = $window.FindName("IFValueTextBox").Text.Trim('"')
+            if ($ifValue) {
+                $options += "/IF:`"$ifValue`" "
+            }
+        }
+        if ($window.FindName("COMPRESSCheckbox").IsChecked -eq $true) { $options += "/COMPRESS " }
+        if ($window.FindName("MTSCCheckbox").IsChecked -eq $true) { $options += "/MTSC " }
+        if ($window.FindName("UNILOGCheckbox").IsChecked -eq $true) {
+            $unilogValue = $window.FindName("UNILOGValueTextBox").Text.Trim('"')
+            if ($unilogValue) {
+                $options += "/UNILOG:`"$unilogValue`" "
+            }
+        }
 
         $command = "Robocopy $source $destination $options"
         Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit", "-Command", $command
