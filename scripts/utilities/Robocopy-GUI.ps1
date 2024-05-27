@@ -22,7 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName System.Windows.Forms
 
@@ -603,7 +602,7 @@ function Show-RobocopyGui {
             }
         }
 
-        $command = "Robocopy $source $destination $options"
+        $command = "Robocopy '$source' '$destination' $options"
         Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit", "-Command", $command
     })
 
