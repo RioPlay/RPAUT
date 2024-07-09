@@ -38,7 +38,7 @@ function Show-CommonMTUStandards {
 }
 
 function Get-NetworkAdapters {
-    return Get-NetAdapter | Where-Object { $_.Status -eq 'Up' }
+    return Get-NetAdapter
 }
 
 function Get-AdapterMTU {
@@ -51,6 +51,7 @@ function Get-AdapterMTU {
     return [PSCustomObject]@{
         AdapterName           = $adapter.Name
         InterfaceDescription  = $adapter.InterfaceDescription
+        Status                = $adapter.Status
         ActiveMTU             = if ($activeMTU -is [System.Array]) { $activeMTU[0] } else { $activeMTU }
         PersistentMTU         = if ($persistentMTU -is [System.Array]) { $persistentMTU[0] } else { $persistentMTU }
     }
@@ -60,12 +61,12 @@ function Show-MTUSettings {
     $adapters = Get-NetworkAdapters
 
     if ($adapters.Count -eq 0) {
-        Write-Host "No active network adapters found."
+        Write-Host "No network adapters found."
         return
     }
 
     $adapterMTUs = $adapters | ForEach-Object { Get-AdapterMTU -AdapterName $_.Name }
-    $adapterMTUs | Format-Table AdapterName, InterfaceDescription, ActiveMTU, PersistentMTU
+    $adapterMTUs | Format-Table AdapterName, InterfaceDescription, Status, ActiveMTU, PersistentMTU
 }
 
 function Set-AdapterMTU {
@@ -85,8 +86,53 @@ function Set-AdapterMTU {
             Write-Host "Setting MTU for adapter '$AdapterName' to $MTU bytes for this session."
             Set-NetIPInterface -InterfaceIndex $adapter.InterfaceIndex -NlMtu $MTU -PolicyStore ActiveStore
         }
+
+        # Verify the MTU value
+        Start-Sleep -Seconds 2  # Wait a moment to ensure the setting is applied
+        $currentActiveMTU = (Get-NetIPInterface -InterfaceIndex $adapter.InterfaceIndex -PolicyStore ActiveStore).NlMtu
+        $currentPersistentMTU = (Get-NetIPInterface -InterfaceIndex $adapter.InterfaceIndex -PolicyStore PersistentStore).NlMtu
+
+        if ($currentActiveMTU -eq $MTU) {
+            Write-Host "Active MTU set successfully to $MTU bytes."
+        } else {
+            Write-Host "Failed to set Active MTU to $MTU bytes. Current Active MTU is $currentActiveMTU bytes. This might indicate an invalid value."
+        }
+
+        if ($Persistent -and $currentPersistentMTU -ne $MTU) {
+            Write-Host "Failed to set Persistent MTU to $MTU bytes. Current Persistent MTU is $currentPersistentMTU bytes. This might indicate an invalid value."
+        } elseif ($Persistent) {
+            Write-Host "Persistent MTU set successfully to $MTU bytes."
+        }
     } catch {
         Write-Host "Failed to set MTU: $_"
+    }
+}
+
+function Enable-NetworkAdapter {
+    param ([string]$AdapterName)
+
+    Get-NetAdapter | Where-Object { $_.Name -eq $AdapterName }
+
+    try {
+        Write-Host "Enabling network adapter '$AdapterName'."
+        Enable-NetAdapter -Name $AdapterName -Confirm:$false
+        Write-Host "Network adapter '$AdapterName' enabled successfully."
+    } catch {
+        Write-Host "Failed to enable network adapter '$AdapterName': $_"
+    }
+}
+
+function Disable-NetworkAdapter {
+    param ([string]$AdapterName)
+
+    Get-NetAdapter | Where-Object { $_.Name -eq $AdapterName }
+
+    try {
+        Write-Host "Disabling network adapter '$AdapterName'."
+        Disable-NetAdapter -Name $AdapterName -Confirm:$false
+        Write-Host "Network adapter '$AdapterName' disabled successfully."
+    } catch {
+        Write-Host "Failed to disable network adapter '$AdapterName': $_"
     }
 }
 
@@ -177,11 +223,11 @@ function Set-AdapterMTUSetting {
 
     $adapters = Get-NetworkAdapters
     if ($adapters.Count -eq 0) {
-        Write-Host "No active network adapters found."
+        Write-Host "No network adapters found."
         return
     }
 
-    $adapters | ForEach-Object { $i = [array]::IndexOf($adapters, $_) + 1; Write-Host "$i. $($_.Name) - $($_.InterfaceDescription)" }
+    $adapters | ForEach-Object { $i = [array]::IndexOf($adapters, $_) + 1; Write-Host "$i. $($_.Name) - $($_.InterfaceDescription) - $($_.Status)" }
 
     Write-Host ""
     $adapterIndex = [int](Read-Host "Select a network adapter to set $SettingType MTU setting (enter the number)")
@@ -199,19 +245,25 @@ function Set-AdapterMTUSetting {
 }
 
 function Test-AdapterMTUProcess {
+    Write-Host "Note: Testing will only work for adapters that are up/enabled."
     $adapters = Get-NetworkAdapters
     if ($adapters.Count -eq 0) {
-        Write-Host "No active network adapters found."
+        Write-Host "No network adapters found."
         return
     }
 
-    $adapters | ForEach-Object { $i = [array]::IndexOf($adapters, $_) + 1; Write-Host "$i. $($_.Name) - $($_.InterfaceDescription)" }
+    $adapters | ForEach-Object { $i = [array]::IndexOf($adapters, $_) + 1; Write-Host "$i. $($_.Name) - $($_.InterfaceDescription) - $($_.Status)" }
     Write-Host ""
 
     $adapterIndex = [int](Read-Host "Select a network adapter (enter the number)")
     $selectedAdapter = $adapters[$adapterIndex - 1]
     if ($null -eq $selectedAdapter) {
         Write-Host "Invalid selection. Exiting."
+        return
+    }
+
+    if ($selectedAdapter.Status -ne 'Up') {
+        Write-Host "Selected adapter is not up/enabled. Please enable the adapter before testing."
         return
     }
 
@@ -387,7 +439,9 @@ function Main {
         Write-Host "  2. Test and set MTU"
         Write-Host "  3. Set active MTU setting"
         Write-Host "  4. Set persistent MTU setting"
-        Write-Host "  5. Exit"
+        Write-Host "  5. Enable network adapter"
+        Write-Host "  6. Disable network adapter"
+        Write-Host "  7. Exit"
         Write-Host ""
         
         $option = [int](Read-Host "Select an option (enter the number)")
@@ -397,7 +451,45 @@ function Main {
             2 { Test-AdapterMTUProcess }
             3 { Set-AdapterMTUSetting -SettingType "active" }
             4 { Set-AdapterMTUSetting -SettingType "persistent" }
-            5 { Write-Host "Exiting..."; exit }
+            5 {
+                $adapters = Get-NetworkAdapters
+                if ($adapters.Count -eq 0) {
+                    Write-Host "No network adapters found."
+                    break
+                }
+
+                $adapters | ForEach-Object { $i = [array]::IndexOf($adapters, $_) + 1; Write-Host "$i. $($_.Name) - $($_.InterfaceDescription) - $($_.Status)" }
+                Write-Host ""
+                
+                $adapterIndex = [int](Read-Host "Select a network adapter to enable (enter the number)")
+                $selectedAdapter = $adapters[$adapterIndex - 1]
+                
+                if ($null -eq $selectedAdapter) {
+                    Write-Host "Invalid selection. Exiting."
+                } else {
+                    Enable-NetworkAdapter -AdapterName $selectedAdapter.Name
+                }
+            }
+            6 {
+                $adapters = Get-NetworkAdapters
+                if ($adapters.Count -eq 0) {
+                    Write-Host "No network adapters found."
+                    break
+                }
+
+                $adapters | ForEach-Object { $i = [array]::IndexOf($adapters, $_) + 1; Write-Host "$i. $($_.Name) - $($_.InterfaceDescription) - $($_.Status)" }
+                Write-Host ""
+                
+                $adapterIndex = [int](Read-Host "Select a network adapter to disable (enter the number)")
+                $selectedAdapter = $adapters[$adapterIndex - 1]
+                
+                if ($null -eq $selectedAdapter) {
+                    Write-Host "Invalid selection. Exiting."
+                } else {
+                    Disable-NetworkAdapter -AdapterName $selectedAdapter.Name
+                }
+            }
+            7 { Write-Host "Exiting..."; exit }
             default { Write-Host "Invalid selection. Please try again." }
         }
     }
